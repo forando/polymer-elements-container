@@ -1,8 +1,15 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../iron-media-query/iron-media-query.html">
+<link rel="import" href="../user-gmail/user-gmail.html">
+<link rel="import" href="container-icons.html">
 
 <!--
 `elements-container`
-Container to manage same elements inside
+Container to manage children elements inside
 
 @demo demo/index.html 
 -->
@@ -13,8 +20,66 @@ Container to manage same elements inside
       :host {
         display: block;
       }
+
+      paper-material{
+        margin: 16px 16px;
+        padding: 16px;
+      }
+
+      .flex-horizontal {
+        @apply(--layout-horizontal);
+      }
+      .flexchild {
+        @apply(--layout-flex);
+      }
+
+      .flex-wrap {
+        @apply(--layout-horizontal);
+        @apply(--layout-wrap);
+      }
+
+      .card {
+        margin: 24px;
+        padding: 16px;
+        color: #757575;
+        border-radius: 5px;
+        background-color: #fff;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
     </style>
-    <h2>Hello [[prop1]]</h2>
+
+    <iron-media-query query="(max-width: 600px)" query-matches="{{smallScreen}}"></iron-media-query>
+
+    <div class="card">
+      <div  id="admin-container" class="container flex-wrap">
+        <template is="dom-repeat" id="rows" items="{{visibleChildren}}">
+          <div id="listitem{{item.created}}" class="list-item">
+            <paper-material elevation="2">
+              <paper-icon-button suffix on-click="_deleteItem"
+                                 icon="container-icons:clear"
+                                 alt="clear"
+                                 title="clear">
+              </paper-icon-button>
+              <template is="dom-if" if="{{childrenType == 'user-gmail'}}">
+                <user-gmail id="row{{item.created}}"
+                            row-id="{{item.created}}"
+                            name="{{item.managerName}}"
+                            email="{{item.name}}"
+                            role="{{item.role}}"
+                            level="item.arrayIndex"
+                            user="{{item}}"></user-gmail>
+              </template>
+            </paper-material>
+          </div>
+        </template>
+      </div>
+      <div class="container flex-horizontal">
+        <paper-button raised on-click="_addItem">Добавить</paper-button>
+        <div class="flexchild"></div>
+        <paper-button raised on-click="_saveItems">Сохранить</paper-button>
+      </div>
+    </div>
+
   </template>
 
   <script>
@@ -23,11 +88,92 @@ Container to manage same elements inside
       is: 'elements-container',
 
       properties: {
-        prop1: {
-          type: String,
-          value: 'elements-container',
-        },
+          childrenType:{
+              type: String,
+              value: 'user-gmail'
+          },
+          children:{
+              type: Array,
+              value: function(){return [];}
+          },
+          visibleChildren:{
+              type: Array,
+              value: function(){return [];}
+          },
+          smallScreen: {
+              type: Boolean,
+              observer: '_smallScreenChanged'
+          }
       },
+
+      observers: [
+          '_visibleChildrenChanged(visibleChildren.splices)'
+      ],
+
+      _visibleChildrenChanged: function(changeRecord){
+          if (changeRecord && changeRecord.indexSplices) {
+              var splice = changeRecord.indexSplices["0"];
+              var user;
+              if(splice.addedCount > 0){
+                  user = splice.object[splice.index];
+                  this.$.rows.render();
+                  var listitem = this.getListItem(user.created);
+                  this.setListItemStyles(listitem, this.smallScreen);
+              }
+          }
+      },
+
+      childrenChanged: function(){
+
+          this.splice('visibleChildren', 0, this.visibleChildren.length);
+
+          for (var i = 0; i < this.children.length; i++) {
+              var child = this.children[i];
+              this.push('visibleChildren', child);
+          }
+      },
+
+      _addItem: function(){
+          this.push('visibleChildren', this._getDummy(this.childrenType));
+      },
+
+      _deleteItem: function(e) {
+          var item = this.$.rows.itemForElement(e.target);
+          var index = this.visibleChildren.indexOf(item);
+          this.splice('visibleChildren', index, 1);
+      },
+
+      _getDummy: function (type) {
+        var dummy = {};
+        switch (type){
+            case 'user-gmail':
+                dummy = {managerName: "", name: "", role: "2", created: new Date().getTime()};
+                break;
+        }
+        return dummy;
+      },
+
+      getRow: function (id) {
+          var rowId = '#row' + id;
+          return this.$$(rowId);
+      },
+
+      getListItem: function(id){
+          var itemId = '#listitem' + id;
+          return this.$$(itemId);
+      },
+
+      setListItemStyles: function(listitem, isSmall){
+          listitem.style.maxWidth = isSmall ? '100%' : '450px';
+          listitem.style.width = isSmall ? '100%' : '450px';
+      },
+
+      _smallScreenChanged: function(newValue) {
+          for(var i=0; i<this.visibleChildren.length; i++){
+              var listItem = this.getListItem(this.visibleChildren[i].created);
+              this.setListItemStyles(listItem, newValue);
+          }
+      }
 
     });
   </script>
