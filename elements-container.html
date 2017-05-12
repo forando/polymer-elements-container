@@ -1,3 +1,8 @@
+<!--
+@license
+Copyright (c) Andrii Logoshko. All rights reserved.
+-->
+
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../paper-material/paper-material.html">
 <link rel="import" href="../paper-button/paper-button.html">
@@ -11,6 +16,8 @@
 `elements-container`
 Container to manage children elements inside
 
+@group Forando Polymer Element
+@element elements-container
 @demo demo/index.html 
 -->
 
@@ -48,11 +55,11 @@ Container to manage children elements inside
       }
     </style>
 
-    <iron-media-query query="(max-width: 600px)" query-matches="{{smallScreen}}"></iron-media-query>
+    <iron-media-query query="(max-width: 600px)" query-matches="{{_smallScreen}}"></iron-media-query>
 
     <div class="card">
       <div  id="admin-container" class="container flex-wrap">
-        <template is="dom-repeat" id="rows" items="{{visibleChildren}}">
+        <template is="dom-repeat" id="rows" items="{{_visibleChildren}}">
           <div id="listitem{{item.created}}" class="list-item">
             <paper-material elevation="2">
               <paper-icon-button suffix on-click="_deleteItem"
@@ -88,27 +95,40 @@ Container to manage children elements inside
       is: 'elements-container',
 
       properties: {
+          /**
+           * Can be:
+           * <ul>
+           *     <li> user-gmail </li>
+           *  </ul>
+           */
           childrenType:{
               type: String,
               value: 'user-gmail'
           },
+          /**
+           * An array of element objects to be managed
+           */
           children:{
               type: Array,
               value: function(){return [];}
           },
-          visibleChildren:{
+          _visibleChildren:{
               type: Array,
               value: function(){return [];}
           },
-          smallScreen: {
+          _smallScreen: {
               type: Boolean,
               observer: '_smallScreenChanged'
           }
       },
 
       observers: [
-          '_visibleChildrenChanged(visibleChildren.splices)'
+          '_visibleChildrenChanged(_visibleChildren.splices)'
       ],
+
+      ready: function () {
+          this.visibleChildren = []
+      },
 
       _visibleChildrenChanged: function(changeRecord){
           if (changeRecord && changeRecord.indexSplices) {
@@ -117,30 +137,43 @@ Container to manage children elements inside
               if(splice.addedCount > 0){
                   user = splice.object[splice.index];
                   this.$.rows.render();
-                  var listitem = this.getListItem(user.created);
-                  this.setListItemStyles(listitem, this.smallScreen);
+                  var listItem = this._getListItem(user.created);
+                  this._setListItemStyles(listItem, this._smallScreen);
               }
           }
       },
 
-      childrenChanged: function(){
+      /**
+       * Invoke this function to replace children with new ones
+       */
+      updateChildren: function(){
 
-          this.splice('visibleChildren', 0, this.visibleChildren.length);
+        this.splice('_visibleChildren', 0, this._visibleChildren.length);
 
-          for (var i = 0; i < this.children.length; i++) {
-              var child = this.children[i];
-              this.push('visibleChildren', child);
-          }
+        for (var i = 0; i < this.children.length; i++) {
+            var child = this.children[i];
+            this.push('_visibleChildren', child);
+        }
+      },
+
+      /**
+       * Finds a child at a given id
+       * @param id Unique identifier
+       * @returns A child object of a predefined type (@see childrenType)
+       */
+      getChild: function (id) {
+          var rowId = '#row' + id;
+          return this.$$(rowId);
       },
 
       _addItem: function(){
-          this.push('visibleChildren', this._getDummy(this.childrenType));
+          this.push('_visibleChildren', this._getDummy(this.childrenType));
       },
 
       _deleteItem: function(e) {
           var item = this.$.rows.itemForElement(e.target);
-          var index = this.visibleChildren.indexOf(item);
-          this.splice('visibleChildren', index, 1);
+          var index = this._visibleChildren.indexOf(item);
+          this.splice('_visibleChildren', index, 1);
       },
 
       _getDummy: function (type) {
@@ -153,25 +186,25 @@ Container to manage children elements inside
         return dummy;
       },
 
-      getRow: function (id) {
-          var rowId = '#row' + id;
-          return this.$$(rowId);
-      },
-
-      getListItem: function(id){
+      /**
+       * Finds a child wrapper at a given id
+       * @param id Unique identifier
+       * @returns A child wrapper element
+       */
+      _getListItem: function(id){
           var itemId = '#listitem' + id;
           return this.$$(itemId);
       },
 
-      setListItemStyles: function(listitem, isSmall){
-          listitem.style.maxWidth = isSmall ? '100%' : '450px';
-          listitem.style.width = isSmall ? '100%' : '450px';
+      _setListItemStyles: function(listItem, isSmall){
+          listItem.style.maxWidth = isSmall ? '100%' : '450px';
+          listItem.style.width = isSmall ? '100%' : '450px';
       },
 
       _smallScreenChanged: function(newValue) {
-          for(var i=0; i<this.visibleChildren.length; i++){
-              var listItem = this.getListItem(this.visibleChildren[i].created);
-              this.setListItemStyles(listItem, newValue);
+          for(var i=0; i<this._visibleChildren.length; i++){
+              var listItem = this._getListItem(this._visibleChildren[i].created);
+              this._setListItemStyles(listItem, newValue);
           }
       }
 
