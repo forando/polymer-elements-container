@@ -83,7 +83,9 @@ Container to manage children elements inside
       <div class="container flex-horizontal">
         <paper-button raised on-click="_addItem">Добавить</paper-button>
         <div class="flexchild"></div>
-        <paper-button raised on-click="_saveItems">Сохранить</paper-button>
+        <template is="dom-if" if="{{showSaveButton}}">
+          <paper-button raised on-click="_saveItems">Сохранить</paper-button>
+        </template>
       </div>
     </div>
 
@@ -111,6 +113,13 @@ Container to manage children elements inside
           children:{
               type: Array,
               value: function(){return [];}
+          },
+          /**
+           * If TRUE - SAVE button is shown
+           */
+          showSaveButton: {
+              type: Boolean,
+              value: false
           },
           _visibleChildren:{
               type: Array,
