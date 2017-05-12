@@ -1,0 +1,34 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`elements-container`
+Container to manage same elements inside
+
+@demo demo/index.html 
+-->
+
+<dom-module id="elements-container">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]</h2>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'elements-container',
+
+      properties: {
+        prop1: {
+          type: String,
+          value: 'elements-container',
+        },
+      },
+
+    });
+  </script>
+</dom-module>
