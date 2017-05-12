@@ -1,6 +1,6 @@
 # \<elements-container\>
 
-Container to manage same elements inside
+Container to manage elements of one type.
 
 ## Install the Polymer-CLI
 
