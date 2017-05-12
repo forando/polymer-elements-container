@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/forando/polymer-elements-container.svg?branch=master)](https://travis-ci.org/forando/polymer-elements-container)
 # \<elements-container\>
 
 Container to manage elements of one type.
