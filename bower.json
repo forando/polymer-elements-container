@@ -11,7 +11,7 @@
     "iron-media-query": "PolymerElements/iron-media-query#^1.0.8",
     "iron-icon": "PolymerElements/iron-icon#^1.0.13",
     "iron-iconset-svg": "PolymerElements/iron-iconset-svg#^1.1.1",
-    "user-gmail": "forando/polymer-user-gmail#^0.0.1"
+    "user-gmail": "forando/polymer-user-gmail#^0.0.2"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
